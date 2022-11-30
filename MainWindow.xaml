@@ -6,7 +6,19 @@
         xmlns:local="clr-namespace:Proj3"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <Grid>
+    
+    <Grid Background="AliceBlue">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
 
+        <Border BorderThickness="2" BorderBrush="Black" Grid.Column="1" Background="White" Width="350" Height="350" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <Canvas Name="chromaticCanvas"/>
+        </Border>
+
+        <Border BorderThickness="2" BorderBrush="Black" Grid.Column="0" Background="White" Width="350" Height="350" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <Canvas Name="bezierCanvas"/>
+        </Border>
     </Grid>
 </Window>

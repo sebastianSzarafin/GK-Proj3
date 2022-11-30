@@ -20,9 +20,12 @@ namespace Proj3
     /// </summary>
     public partial class MainWindow : Window
     {
+        static Chromatic chromatic = new Chromatic();
+
         public MainWindow()
         {
             InitializeComponent();
+            chromatic.Initialize(chromaticCanvas);            
         }
     }
 }
