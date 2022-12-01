@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -101,27 +102,17 @@ namespace Proj3
             Point top = wavesOnCanvas.MaxBy(w => w.p.Y).p;
             Point bottom = wavesOnCanvas.MinBy(w => w.p.Y).p;
 
-            /*Image chromaticDiagram = new Image
-            {
-                Width = right.X - left.X + 10,
-                Height = top.Y - bottom.Y + 40,
-                Source = new BitmapImage(new Uri("//Mac/Home/Documents/SEM5/GK/Proj3/Proj3/bin/Debug/net6.0-windows/chromaticDiagram1.png", UriKind.Absolute))
-            };
-            chromaticDiagram.RenderTransform = new RotateTransform(3);
-            canvas.Children.Add(chromaticDiagram);
-            Canvas.SetLeft(chromaticDiagram, left.X);
-            Canvas.SetTop(chromaticDiagram, bottom.Y - 30);*/
-
             Image chromaticDiagram = new Image
             {
-                Width = right.X - left.X + 20,
-                Height = top.Y - bottom.Y + 20,
-                Source = new BitmapImage(new Uri("//Mac/Home/Documents/SEM5/GK/Proj3/Proj3/bin/Debug/net6.0-windows/chromaticDiagram1.png", UriKind.Absolute))
+                Width = right.X - left.X + 30,
+                Height = top.Y - bottom.Y + 30,
+                //Source = new BitmapImage(new Uri("//Mac/Home/Documents/SEM5/GK/Proj3/Proj3/bin/Debug/net6.0-windows/chromaticDiagram1.png", UriKind.Absolute)
+                Source = new BitmapImage(new Uri(Environment.CurrentDirectory.ToString() + "\\chromaticDiagram1.png"))
             };
-            chromaticDiagram.RenderTransform = new RotateTransform(3.5);
+            chromaticDiagram.RenderTransform = new RotateTransform(2);
             canvas.Children.Add(chromaticDiagram);
-            Canvas.SetLeft(chromaticDiagram, left.X + 3);
-            Canvas.SetTop(chromaticDiagram, bottom.Y - 18);
+            Canvas.SetLeft(chromaticDiagram, left.X);
+            Canvas.SetTop(chromaticDiagram, bottom.Y - 15);
         }
     }
 }
