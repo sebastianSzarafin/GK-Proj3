@@ -106,7 +106,6 @@ namespace Proj3
             {
                 Width = right.X - left.X + 30,
                 Height = top.Y - bottom.Y + 30,
-                //Source = new BitmapImage(new Uri("//Mac/Home/Documents/SEM5/GK/Proj3/Proj3/bin/Debug/net6.0-windows/chromaticDiagram1.png", UriKind.Absolute)
                 Source = new BitmapImage(new Uri(Environment.CurrentDirectory.ToString() + "\\chromaticDiagram1.png"))
             };
             chromaticDiagram.RenderTransform = new RotateTransform(2);
