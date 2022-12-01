@@ -13,16 +13,21 @@
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
 
-        <Border BorderThickness="2" BorderBrush="Black" Grid.Column="1" Background="White" Width="350" Height="350" VerticalAlignment="Center" HorizontalAlignment="Center">
-            <Canvas Name="chromaticCanvas">
+        <Border BorderThickness="2" BorderBrush="Black" Grid.Column="1" Background="White" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <Canvas Name="chromaticCanvas" Width="350" Height="350">
                 <StackPanel Canvas.Right="10" Canvas.Top="10">
                     <Button x:Name="ChromaticBackgroundButton" Width="100" Click="ChromaticBackgroundButtonClick">Background ON</Button>
                 </StackPanel>
             </Canvas>
         </Border>
-
-        <Border BorderThickness="2" BorderBrush="Black" Grid.Column="0" Background="White" Width="350" Height="350" VerticalAlignment="Center" HorizontalAlignment="Center">
-            <Canvas Name="bezierCanvas"/>
+        
+        <Border BorderThickness="2" BorderBrush="Black" Grid.Column="0" Background="White" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <Canvas Name="bezierCanvas" Width="350" Height="350">
+                <StackPanel Canvas.Right="10" Canvas.Top="10" Orientation="Horizontal">
+                    <TextBlock FontSize="13" Margin="0 0 3 0">Points:</TextBlock>
+                    <TextBox x:Name="bezierPointsTextBox" Width="30" PreviewTextInput="bezierPointsTextBox_PreviewTextInput" TextChanged="bezierPointsTextBox_TextChanged" TextAlignment="Center" VerticalAlignment="Center">0</TextBox>
+                </StackPanel>
+            </Canvas>
         </Border>
     </Grid>
 </Window>

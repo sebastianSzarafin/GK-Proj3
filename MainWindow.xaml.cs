@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -20,13 +21,18 @@ namespace Proj3
     /// </summary>
     public partial class MainWindow : Window
     {
-        static Chromatic chromatic = new Chromatic();
+        Chromatic chromatic;
+        Bezier bezier;
 
         public MainWindow()
         {
             InitializeComponent();
-            chromatic.Initialize(chromaticCanvas);            
-            
+
+            chromatic = new Chromatic();
+            chromatic.Initialize(chromaticCanvas);
+
+            bezier = new Bezier();
+            bezier.Initialize(bezierCanvas);
         }
 
         private void ChromaticBackgroundButtonClick(object sender, RoutedEventArgs e)
@@ -40,6 +46,22 @@ namespace Proj3
             {
                 chromaticCanvas.Children.Add(chromatic.chromaticDiagram);
                 ChromaticBackgroundButton.Content = "Background ON";
+            }
+        }
+
+        private void bezierPointsTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            Regex regex = new Regex("[^0-9]+");
+            e.Handled = regex.IsMatch(e.Text);
+        }
+
+        private void bezierPointsTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            string s = ((TextBox)sender).Text;
+            if (s.Length > 0 && bezier != null)
+            {
+                bezier.bezierPoints = Int32.Parse(s);
+                bezier.ResetCurve(bezierCanvas);
             }
         }
     }
