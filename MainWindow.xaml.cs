@@ -28,5 +28,19 @@ namespace Proj3
             chromatic.Initialize(chromaticCanvas);            
             
         }
+
+        private void ChromaticBackgroundButtonClick(object sender, RoutedEventArgs e)
+        {
+            if(ChromaticBackgroundButton.Content.ToString() == "Background ON")
+            {
+                chromaticCanvas.Children.Remove(chromatic.chromaticDiagram);
+                ChromaticBackgroundButton.Content = "Background OFF";
+            }
+            else
+            {
+                chromaticCanvas.Children.Add(chromatic.chromaticDiagram);
+                ChromaticBackgroundButton.Content = "Background ON";
+            }
+        }
     }
 }

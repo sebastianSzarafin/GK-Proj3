@@ -22,12 +22,12 @@ namespace Proj3
         static int offset = 20;
         List<(int i, Point3D p)> waves;
         List<(int i, Point p)> wavesOnCanvas;
-
+        public Image? chromaticDiagram;
 
         public Chromatic()
         {
             waves = new List<(int i, Point3D p)>();
-            wavesOnCanvas = new List<(int i, Point p)>();
+            wavesOnCanvas = new List<(int i, Point p)>();            
         }
 
         public void SetBorder(Canvas canvas)
@@ -44,8 +44,8 @@ namespace Proj3
 
                 Ellipse ellipse = new Ellipse();
                 ellipse.Fill = new SolidColorBrush(CIEtoRGB(X, Y, Z));
-                ellipse.Width = 5;
-                ellipse.Height = 5;
+                ellipse.Width = 10;
+                ellipse.Height = 10;
                 canvas.Children.Add(ellipse);
                 Canvas.SetLeft(ellipse, xp);
                 Canvas.SetTop(ellipse, yp);
@@ -79,7 +79,7 @@ namespace Proj3
         {
             GetWaves();
             SetBorder(canvas);
-            ProcessImage(canvas);
+            chromaticDiagram = ProcessImage(canvas);
         }
         void GetWaves()
         {
@@ -95,7 +95,7 @@ namespace Proj3
                         Convert.ToDouble(parts[3], CultureInfo.InvariantCulture))));
             }
         }
-        void ProcessImage(Canvas canvas)
+        Image ProcessImage(Canvas canvas)
         {
             Point left = wavesOnCanvas.MinBy(w => w.p.X).p;
             Point right = wavesOnCanvas.MaxBy(w => w.p.X).p;
@@ -112,6 +112,8 @@ namespace Proj3
             canvas.Children.Add(chromaticDiagram);
             Canvas.SetLeft(chromaticDiagram, left.X);
             Canvas.SetTop(chromaticDiagram, bottom.Y - 15);
+
+            return chromaticDiagram;
         }
     }
 }
