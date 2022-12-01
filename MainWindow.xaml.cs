@@ -26,6 +26,7 @@ namespace Proj3
         {
             InitializeComponent();
             chromatic.Initialize(chromaticCanvas);            
+            
         }
     }
 }
