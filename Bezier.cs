@@ -22,71 +22,39 @@ namespace Proj3
         Vertex start, end;
         List<Vertex> points;
         List<Edge> edges;
+        List<Rectangle> curve;
 
         public Bezier() 
         {
             start = new Vertex(new Point(offset, canvasHeight / 2), Colors.Black, Colors.Green);
             end = new Vertex(new Point(canvasWidth - offset, canvasHeight / 2), Colors.Black, Colors.Green);
-            /*edges = new List<Edge>() { new Edge(start, end) };
-            start.e1 = edges[0];
-            end.e1 = edges[0];*/
-            edges = new List<Edge>() { Vertex.ConnectVertices(start, end) };
-            points = new List<Vertex>(); 
+            edges = new List<Edge>();
+            points = new List<Vertex>();
+            curve = new List<Rectangle>();
         }
 
         public void Initialize(Canvas canvas)
         {
             canvas.Children.Add(start);
             canvas.Children.Add(end);
-            canvas.Children.Add(edges[0]);
+            for (double t = 0; t <= 1; t += 0.005)
+            {
+                Rectangle r = new Rectangle() { Width = 1, Height = 2, Fill = Brushes.Black };
+                Canvas.SetLeft(r, start.position.X + t * (end.position.X - start.position.X));
+                Canvas.SetTop(r, start.position.Y);
+                curve.Add(r);
+                canvas.Children.Add(r);
+            }
         }
         public void ResetCurve(Canvas canvas)
         {
-            /*canvas.Children.RemoveRange(1, canvas.Children.Count - 1);
-            edges.Clear();
-            points.Clear();
-            start = new Vertex(new Point(offset, canvasHeight / 2), Colors.Black, Colors.Green);
-            end = new Vertex(new Point(canvasWidth - offset, canvasHeight / 2), Colors.Black, Colors.Green);
-            if(bezierPoints == 0)
-            {
-                edges = new List<Edge>() { new Edge(start, end) };
-                start.e1 = edges[0];
-                end.e1 = edges[0];
-            }
-            else
-            {
-                double step = (end.position.X - start.position.X) / (bezierPoints + 1);
-                double y = 50, dir = 1;
-                for (double i = start.position.X + step; i < end.position.X; i += step)
-                {
-                    points.Add(new Vertex(new Point(i, start.position.Y + y * dir), Colors.Blue, Colors.Gray));
-                    dir *= -1;
-                }
-                edges.Add(new Edge(start, points[0]));
-                start.e1 = edges[0];
-                points[0].e1 = edges[0];
-                for (int i = 0; i < points.Count - 1; i++) edges.Add(new Edge(points[i], points[i + 1]));
-                for(int i = 1; i < points.Count - 1; i++)
-                {
-                    points[i].
-                }
-                edges.Add(new Edge(points[points.Count - 1], end));
-                end.e1 = edges[edges.Count - 1];
-                points[points.Count - 1].e2 = edges[edges.Count - 1];
-            }
-
-            foreach (Edge e in edges) canvas.Children.Add(e);
-            foreach (Vertex p in points) canvas.Children.Add(p);
-            canvas.Children.Add(start);
-            canvas.Children.Add(end);*/
-
             canvas.Children.RemoveRange(1, canvas.Children.Count - 1);
             edges.Clear();
             points.Clear();
             start = new Vertex(new Point(offset, canvasHeight / 2), Colors.Black, Colors.Green);
             end = new Vertex(new Point(canvasWidth - offset, canvasHeight / 2), Colors.Black, Colors.Green);
             
-            if (bezierPoints == 0) edges = new List<Edge>() { Vertex.ConnectVertices(start, end) };
+            if (bezierPoints == 0) edges = new List<Edge>();
             else
             {
                 double step = (end.position.X - start.position.X) / (bezierPoints + 1);
@@ -110,6 +78,51 @@ namespace Proj3
             foreach (Vertex p in points) canvas.Children.Add(p);
             canvas.Children.Add(start);
             canvas.Children.Add(end);
+
+            DrawCurve(canvas);
+        }
+        public void DrawCurve(Canvas canvas)
+        {
+            int n = 2 + bezierPoints - 1;
+            double[] binoms = new double[n + 1];
+            for (int k = 0; k < n + 1; k++) binoms[k] = binomCoefficient(n, k);
+            List<Vertex> curvePoints = new List<Vertex>(points);
+            curvePoints.Insert(0, start);
+            curvePoints.Insert(curvePoints.Count, end);
+            double t = 0;
+            foreach (Rectangle r in curve)
+            {
+                canvas.Children.Remove(r);
+
+                int i = 0;
+                double valX = 0, valY = 0;
+                foreach(Vertex p in curvePoints)
+                {
+                    valX += binoms[i] * Math.Pow(1 - t, n - i) * Math.Pow(t, i) * p.position.X;
+                    valY += binoms[i] * Math.Pow(1 - t, n - i) * Math.Pow(t, i) * p.position.Y;
+                    i++;
+                }
+
+                Canvas.SetLeft(r, valX);
+                Canvas.SetTop(r, valY);
+                canvas.Children.Add(r);
+
+                t += 0.005;
+            }
+
+            double binomCoefficient(double n, double k)
+            {
+                if (k > n) { return 0; }
+                if (n == k) { return 1; }
+                if (k > n - k) { k = n - k; }
+                double c = 1;
+                for (double i = 1; i <= k; i++)
+                {
+                    c *= n--;
+                    c /= i;
+                }
+                return c;
+            }
         }
     }
 
@@ -203,7 +216,7 @@ namespace Proj3
             }
         }
     }
-    public class Edge :UIElement
+    public class Edge : UIElement
     {
         Vertex p1, p2;
         public Vertex P1 { get => p1; }
@@ -216,7 +229,7 @@ namespace Proj3
         }
         protected override void OnRender(DrawingContext drawingContext)
         {
-            drawingContext.DrawLine(new Pen(Brushes.Blue, 2), p1.position, p2.position);
+            drawingContext.DrawLine(new Pen(Brushes.Blue, 1), p1.position, p2.position);
         }
     }
 }

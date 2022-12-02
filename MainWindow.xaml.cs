@@ -64,5 +64,12 @@ namespace Proj3
                 bezier.ResetCurve(bezierCanvas);
             }
         }
+
+        private void bezierCanvas_MouseDown(object sender, MouseButtonEventArgs e) => bezier.DrawCurve(bezierCanvas);
+
+        private void bezierCanvas_MouseMove(object sender, MouseEventArgs e)
+        {
+            bezier.DrawCurve(bezierCanvas);
+        }
     }
 }
