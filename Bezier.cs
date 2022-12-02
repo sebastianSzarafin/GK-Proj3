@@ -37,7 +37,7 @@ namespace Proj3
         {
             canvas.Children.Add(start);
             canvas.Children.Add(end);
-            for (double t = 0; t <= 1; t += 0.005)
+            for (double t = 0; t <= 1; t += 0.0025)
             {
                 Rectangle r = new Rectangle() { Width = 1, Height = 2, Fill = Brushes.Black };
                 Canvas.SetLeft(r, start.position.X + t * (end.position.X - start.position.X));
@@ -107,7 +107,7 @@ namespace Proj3
                 Canvas.SetTop(r, valY);
                 canvas.Children.Add(r);
 
-                t += 0.005;
+                t += 0.0025;
             }
 
             double binomCoefficient(double n, double k)
@@ -197,9 +197,11 @@ namespace Proj3
 
         protected override void OnMouseMove(MouseEventArgs e)
         {
+            Canvas parentCanvas = (Canvas)this.VisualParent;
             if (IsMouseCaptured)
             {
-                position = e.GetPosition(this);
+                position.X = Math.Min(Math.Max(e.GetPosition(this).X, radius), parentCanvas.ActualWidth - radius);
+                position.Y = Math.Min(Math.Max(e.GetPosition(this).Y, radius), parentCanvas.ActualHeight - radius);
                 InvalidateVisual();
             }
         }
