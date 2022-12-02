@@ -9,6 +9,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Media3D;
 using System.Windows.Shapes;
 using static System.Net.Mime.MediaTypeNames;
 
@@ -16,43 +17,98 @@ namespace Proj3
 {
     internal class Bezier
     {
-        static int canvasWidth = 350, canvasHeight = 350;
-        static int offset = 20;
+        static List<(int i, Point3D p)> chromaticWaves = new List<(int i, Point3D p)>();
+        static Ellipse chromaticPoint = new Ellipse() { Width = 10, Height = 10, Stroke = Brushes.Black, Fill = Brushes.Red };
+        const int canvasWidth = 350, canvasHeight = 350;
+        const int offset = 20, wavesCount = 341;
+        const double step = 0.002;
         public int bezierPoints = 0;
-        Vertex start, end;
+        VertexC start, end;
         List<Vertex> points;
         List<Edge> edges;
         List<Rectangle> curve;
-
-        public Bezier() 
+        double[] Fcurve;
+        Rectangle chromaticPointColorRectangle;
+        public (double X, double Y, double Z) integral
         {
-            start = new Vertex(new Point(offset, canvasHeight / 2), Colors.Black, Colors.Green);
-            end = new Vertex(new Point(canvasWidth - offset, canvasHeight / 2), Colors.Black, Colors.Green);
+            get
+            {
+                /*double X = 0, Y = 0, Z = 0;
+                for (int i = 0; i < chromaticWaves.Count; i++)
+                {
+                    double Pi = ((canvasHeight - Canvas.GetTop(curve[i])) / canvasHeight * 1.8);
+                    X += Pi * chromaticWaves[i].p.X;
+                    Y += Pi * chromaticWaves[i].p.Y;
+                    Z += Pi * chromaticWaves[i].p.Z;
+                }
+                return (X * step, Y * step, Z * step);*/
+
+                foreach(Rectangle r in curve)
+                {
+                    Fcurve[(int)(Math.Min(Canvas.GetLeft(r), end.position.X) / end.position.X * 340)] = canvasHeight - Canvas.GetTop(r);
+                }
+
+                double X = 0, Y = 0, Z = 0;
+                for (int i = 0; i < chromaticWaves.Count; i++)
+                {
+                    //double Pi = interpolateCurve(chromaticWaves[i].i) / canvasHeight * 1.8;
+                    double Pi = Fcurve[chromaticWaves[i].i - 380] / canvasHeight * 1.8;
+                    X += Pi * chromaticWaves[i].p.X;
+                    Y += Pi * chromaticWaves[i].p.Y;
+                    Z += Pi * chromaticWaves[i].p.Z;
+                }
+                return (X * step, Y * step, Z * step);
+
+                /*double interpolateCurve(int wave)
+                {
+                    Rectangle found = curve[0];
+                    foreach(Rectangle r in curve)
+                    {
+                        if (Math.Abs((380 + (int)(Canvas.GetLeft(r) / end.position.X * 340)) - wave) < Math.Abs((380 + (int)(Canvas.GetLeft(found) / end.position.X * 340)) - wave))
+                        {
+                            found = r;
+                        }
+                    }
+                    return canvasHeight - Canvas.GetTop(found);
+                }*/
+            }
+        }
+
+        public Bezier(Rectangle _chromaticPointColorRectangle) 
+        {
+            start = new VertexC(new Point(offset, canvasHeight / 2), Colors.Black, Colors.Green);
+            end = new VertexC(new Point(canvasWidth - offset, canvasHeight / 2), Colors.Black, Colors.Green);
             edges = new List<Edge>();
             points = new List<Vertex>();
             curve = new List<Rectangle>();
+            chromaticPointColorRectangle = _chromaticPointColorRectangle;
+            Fcurve = new double[wavesCount];
         }
 
-        public void Initialize(Canvas canvas)
+        public void Initialize(Canvas bezierCanvas, List<(int i, Point3D p)> waves, Canvas chromaticCanvas)
         {
-            canvas.Children.Add(start);
-            canvas.Children.Add(end);
-            for (double t = 0; t <= 1; t += 0.0025)
+            bezierCanvas.Children.Add(start);
+            bezierCanvas.Children.Add(end);
+            for (double t = 0; t <= 1; t += step)
             {
                 Rectangle r = new Rectangle() { Width = 1, Height = 2, Fill = Brushes.Black };
                 Canvas.SetLeft(r, start.position.X + t * (end.position.X - start.position.X));
                 Canvas.SetTop(r, start.position.Y);
                 curve.Add(r);
-                canvas.Children.Add(r);
+                bezierCanvas.Children.Add(r);
             }
+            chromaticWaves = waves;
+            chromaticCanvas.Children.Add(chromaticPoint);
+            DrawChromaticPoint();
+            Canvas.SetZIndex(chromaticPoint, 2);
         }
         public void ResetCurve(Canvas canvas)
         {
             canvas.Children.RemoveRange(1, canvas.Children.Count - 1);
             edges.Clear();
             points.Clear();
-            start = new Vertex(new Point(offset, canvasHeight / 2), Colors.Black, Colors.Green);
-            end = new Vertex(new Point(canvasWidth - offset, canvasHeight / 2), Colors.Black, Colors.Green);
+            start = new VertexC(new Point(offset, canvasHeight / 2), Colors.Black, Colors.Green);
+            end = new VertexC(new Point(canvasWidth - offset, canvasHeight / 2), Colors.Black, Colors.Green);
             
             if (bezierPoints == 0) edges = new List<Edge>();
             else
@@ -107,7 +163,7 @@ namespace Proj3
                 Canvas.SetTop(r, valY);
                 canvas.Children.Add(r);
 
-                t += 0.0025;
+                t += step;
             }
 
             double binomCoefficient(double n, double k)
@@ -122,6 +178,40 @@ namespace Proj3
                     c /= i;
                 }
                 return c;
+            }
+        }
+        public void DrawChromaticPoint()
+        {
+            (double X, double Y, double Z) i = integral;
+            double X = i.X / (i.X + i.Y + i.Z);
+            double Y = i.Y / (i.X + i.Y + i.Z);
+            double Z = i.Z / (i.X + i.Y + i.Z);
+
+            int xp = (int)(X * canvasWidth) + offset;
+            int yp = (int)(Y * canvasHeight) + offset;
+            yp = transform(yp, canvasHeight / 2, Math.Abs(yp - canvasHeight / 2));
+
+            Canvas.SetLeft(chromaticPoint, xp);
+            Canvas.SetTop(chromaticPoint, yp);
+
+            chromaticPointColorRectangle.Fill = new SolidColorBrush(CIEtoRGB(X, Y, Z));
+
+            int transform(int y, int OY, int diff) => y < OY ? OY + diff : OY - diff;
+            Color CIEtoRGB(double X, double Y, double Z)
+            {
+                byte R = adj(3.2404542 * X - 1.5371385 * Y - 0.4985314 * Z);
+                byte G = adj(-0.9692660 * X + 1.8760108 * Y + 0.0415560 * Z);
+                byte B = adj(0.0556434 * X - 0.2040259 * Y + 1.0572252 * Z);
+                return Color.FromRgb(R, G, B);
+
+                byte adj(double C)
+                {
+                    if (Math.Abs(C) < 0.0031308)
+                    {
+                        return (byte)(Math.Min(12.92 * C * 255, 255));
+                    }
+                    return (byte)(Math.Min((1.055 * Math.Pow(C, 0.41666) - 0.055) * 255, 255));
+                }
             }
         }
     }
@@ -215,6 +305,19 @@ namespace Proj3
             else
             {
                 DeHighlight();
+            }
+        }
+    }
+    public class VertexC : Vertex
+    {
+        public VertexC(Point _position, Color sc, Color hc) : base(_position, sc, hc) { }
+        protected override void OnMouseMove(MouseEventArgs e)
+        {
+            Canvas parentCanvas = (Canvas)this.VisualParent;
+            if (IsMouseCaptured)
+            {
+                position.Y = Math.Min(Math.Max(e.GetPosition(this).Y, radius), parentCanvas.ActualHeight - radius);
+                InvalidateVisual();
             }
         }
     }

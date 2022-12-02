@@ -21,6 +21,7 @@ namespace Proj3
         static int canvasWidth = 350, canvasHeight = 350; 
         static int offset = 20;
         List<(int i, Point3D p)> waves;
+        public List<(int i, Point3D p)> Waves { get => waves; }
         List<(int i, Point p)> wavesOnCanvas;
         public Image? chromaticDiagram;
 
@@ -40,12 +41,9 @@ namespace Proj3
 
                 int xp = (int)(X * canvasWidth) + offset;
                 int yp = (int)(Y * canvasHeight) + offset;
-                yp = transform(yp, (int)canvasHeight / 2, Math.Abs(yp - (int)(canvasHeight / 2)));
+                yp = transform(yp, canvasHeight / 2, Math.Abs(yp - canvasHeight / 2));
 
-                Ellipse ellipse = new Ellipse();
-                ellipse.Fill = new SolidColorBrush(CIEtoRGB(X, Y, Z));
-                ellipse.Width = 10;
-                ellipse.Height = 10;
+                Ellipse ellipse = new Ellipse() { Width = 5, Height = 5, Fill = new SolidColorBrush(CIEtoRGB(X, Y, Z)) };
                 canvas.Children.Add(ellipse);
                 Canvas.SetLeft(ellipse, xp);
                 Canvas.SetTop(ellipse, yp);
@@ -60,9 +58,6 @@ namespace Proj3
                 byte R = adj(3.2404542 * X - 1.5371385 * Y - 0.4985314 * Z);
                 byte G = adj(-0.9692660 * X + 1.8760108 * Y + 0.0415560 * Z);
                 byte B = adj(0.0556434 * X - 0.2040259 * Y + 1.0572252 * Z);
-
-
-
                 return Color.FromRgb(R, G, B);
 
                 byte adj(double C)
@@ -106,12 +101,11 @@ namespace Proj3
             {
                 Width = right.X - left.X + 30,
                 Height = top.Y - bottom.Y + 30,
-                Source = new BitmapImage(new Uri(Environment.CurrentDirectory.ToString() + "\\chromaticDiagram1.png"))
+                Source = new BitmapImage(new Uri(Environment.CurrentDirectory.ToString() + "\\chromaticDiagram.png"))
             };
-            chromaticDiagram.RenderTransform = new RotateTransform(2);
             canvas.Children.Add(chromaticDiagram);
-            Canvas.SetLeft(chromaticDiagram, left.X);
-            Canvas.SetTop(chromaticDiagram, bottom.Y - 15);
+            Canvas.SetLeft(chromaticDiagram, left.X - 10);
+            Canvas.SetTop(chromaticDiagram, bottom.Y - 10);
 
             return chromaticDiagram;
         }

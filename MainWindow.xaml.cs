@@ -31,8 +31,8 @@ namespace Proj3
             chromatic = new Chromatic();
             chromatic.Initialize(chromaticCanvas);
 
-            bezier = new Bezier();
-            bezier.Initialize(bezierCanvas);
+            bezier = new Bezier(chromaticPointColorRectangle);
+            bezier.Initialize(bezierCanvas, chromatic.Waves, chromaticCanvas);
         }
 
         private void ChromaticBackgroundButtonClick(object sender, RoutedEventArgs e)
@@ -70,6 +70,7 @@ namespace Proj3
         private void bezierCanvas_MouseMove(object sender, MouseEventArgs e)
         {
             bezier.DrawCurve(bezierCanvas);
+            bezier.DrawChromaticPoint();
         }
     }
 }
