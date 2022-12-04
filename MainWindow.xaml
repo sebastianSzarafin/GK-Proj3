@@ -14,7 +14,6 @@
         </Grid.ColumnDefinitions>
 
         <Border BorderThickness="2" BorderBrush="Black" Grid.Column="1" Background="White" VerticalAlignment="Center" HorizontalAlignment="Center">
-            
             <Canvas Name="chromaticCanvas" Width="350" Height="350">
                 <StackPanel Canvas.Right="10" Canvas.Top="10">
                     <Button x:Name="ChromaticBackgroundButton" Width="100" Click="ChromaticBackgroundButtonClick">Background ON</Button>

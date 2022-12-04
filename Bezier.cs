@@ -23,66 +23,40 @@ namespace Proj3
         const int offset = 20, wavesCount = 341;
         const double step = 0.002;
         public int bezierPoints = 0;
-        VertexC start, end;
+        Vertex start, end;
         List<Vertex> points;
         List<Edge> edges;
         List<Rectangle> curve;
-        double[] Fcurve;
+        Point[] Fcurve;
         Rectangle chromaticPointColorRectangle;
         public (double X, double Y, double Z) integral
         {
             get
             {
-                /*double X = 0, Y = 0, Z = 0;
-                for (int i = 0; i < chromaticWaves.Count; i++)
-                {
-                    double Pi = ((canvasHeight - Canvas.GetTop(curve[i])) / canvasHeight * 1.8);
-                    X += Pi * chromaticWaves[i].p.X;
-                    Y += Pi * chromaticWaves[i].p.Y;
-                    Z += Pi * chromaticWaves[i].p.Z;
-                }
-                return (X * step, Y * step, Z * step);*/
-
-                foreach(Rectangle r in curve)
-                {
-                    Fcurve[(int)(Math.Min(Canvas.GetLeft(r), end.position.X) / end.position.X * 340)] = canvasHeight - Canvas.GetTop(r);
-                }
-
                 double X = 0, Y = 0, Z = 0;
-                for (int i = 0; i < chromaticWaves.Count; i++)
+                for (int i = 0; i < curve.Count - 1; i++)
                 {
-                    //double Pi = interpolateCurve(chromaticWaves[i].i) / canvasHeight * 1.8;
-                    double Pi = Fcurve[chromaticWaves[i].i - 380] / canvasHeight * 1.8;
-                    X += Pi * chromaticWaves[i].p.X;
-                    Y += Pi * chromaticWaves[i].p.Y;
-                    Z += Pi * chromaticWaves[i].p.Z;
-                }
-                return (X * step, Y * step, Z * step);
+                    if (Fcurve[i] == default(Point) || Fcurve[i + 1] == default(Point)) continue;
 
-                /*double interpolateCurve(int wave)
-                {
-                    Rectangle found = curve[0];
-                    foreach(Rectangle r in curve)
-                    {
-                        if (Math.Abs((380 + (int)(Canvas.GetLeft(r) / end.position.X * 340)) - wave) < Math.Abs((380 + (int)(Canvas.GetLeft(found) / end.position.X * 340)) - wave))
-                        {
-                            found = r;
-                        }
-                    }
-                    return canvasHeight - Canvas.GetTop(found);
-                }*/
+                    int id = (int)Fcurve[i].X;
+                    double dx = Fcurve[i + 1].X - Fcurve[i].X;
+                    X += Fcurve[i].Y * chromaticWaves[id].p.X * dx;
+                    Y += Fcurve[i].Y * chromaticWaves[id].p.Y * dx;
+                    Z += Fcurve[i].Y * chromaticWaves[id].p.Z * dx;
+                }
+                return (X, Y, Z);
             }
         }
 
         public Bezier(Rectangle _chromaticPointColorRectangle) 
         {
-            start = new VertexC(new Point(offset, canvasHeight / 2), Colors.Black, Colors.Green);
-            end = new VertexC(new Point(canvasWidth - offset, canvasHeight / 2), Colors.Black, Colors.Green);
+            start = new Vertex(new Point(offset, canvasHeight / 2), Colors.Black, Colors.Green);
+            end = new Vertex(new Point(canvasWidth - offset, canvasHeight / 2), Colors.Black, Colors.Green);
             edges = new List<Edge>();
             points = new List<Vertex>();
             curve = new List<Rectangle>();
             chromaticPointColorRectangle = _chromaticPointColorRectangle;
-            Fcurve = new double[wavesCount];
+            Fcurve = new Point[500];
         }
 
         public void Initialize(Canvas bezierCanvas, List<(int i, Point3D p)> waves, Canvas chromaticCanvas)
@@ -99,6 +73,7 @@ namespace Proj3
             }
             chromaticWaves = waves;
             chromaticCanvas.Children.Add(chromaticPoint);
+            DrawCurve(bezierCanvas);
             DrawChromaticPoint();
             Canvas.SetZIndex(chromaticPoint, 2);
         }
@@ -107,8 +82,8 @@ namespace Proj3
             canvas.Children.RemoveRange(1, canvas.Children.Count - 1);
             edges.Clear();
             points.Clear();
-            start = new VertexC(new Point(offset, canvasHeight / 2), Colors.Black, Colors.Green);
-            end = new VertexC(new Point(canvasWidth - offset, canvasHeight / 2), Colors.Black, Colors.Green);
+            start = new Vertex(new Point(offset, canvasHeight / 2), Colors.Black, Colors.Green);
+            end = new Vertex(new Point(canvasWidth - offset, canvasHeight / 2), Colors.Black, Colors.Green);
             
             if (bezierPoints == 0) edges = new List<Edge>();
             else
@@ -139,6 +114,8 @@ namespace Proj3
         }
         public void DrawCurve(Canvas canvas)
         {
+            for (int i = 0; i < Fcurve.Length; i++) Fcurve[i] = default(Point);
+
             int n = 2 + bezierPoints - 1;
             double[] binoms = new double[n + 1];
             for (int k = 0; k < n + 1; k++) binoms[k] = binomCoefficient(n, k);
@@ -162,6 +139,9 @@ namespace Proj3
                 Canvas.SetLeft(r, valX);
                 Canvas.SetTop(r, valY);
                 canvas.Children.Add(r);
+
+                double pX = Math.Min(valX / canvasWidth, 1) * 340, pY = canvasHeight - valY;
+                Fcurve[(int)pX].X = pX; Fcurve[(int)pX].Y = pY;
 
                 t += step;
             }
@@ -305,19 +285,6 @@ namespace Proj3
             else
             {
                 DeHighlight();
-            }
-        }
-    }
-    public class VertexC : Vertex
-    {
-        public VertexC(Point _position, Color sc, Color hc) : base(_position, sc, hc) { }
-        protected override void OnMouseMove(MouseEventArgs e)
-        {
-            Canvas parentCanvas = (Canvas)this.VisualParent;
-            if (IsMouseCaptured)
-            {
-                position.Y = Math.Min(Math.Max(e.GetPosition(this).Y, radius), parentCanvas.ActualHeight - radius);
-                InvalidateVisual();
             }
         }
     }
